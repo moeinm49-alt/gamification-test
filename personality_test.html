@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست شخصیت‌شناسی کاری</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-pattern-A { background-image: radial-gradient(#f97316 1px, transparent 1px); background-size: 20px 20px; }
+        .bg-pattern-B { background-image: linear-gradient(45deg, #8b5cf6 25%, transparent 25%, transparent 75%, #8b5cf6 75%, #8b5cf6); background-size: 20px 20px; }
+        .bg-pattern-C { background-image: repeating-linear-gradient(45deg, #ec4899 0, #ec4899 1px, transparent 0, transparent 50%); background-size: 10px 10px; }
+        .bg-pattern-D { background-image: radial-gradient(circle at 2px 2px, #10b981 2px, transparent 0); background-size: 20px 20px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-slate-900 to-orange-900 min-h-screen flex flex-col text-slate-800">
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-white/95 rounded-[2.5rem] shadow-2xl overflow-hidden relative border border-gray-100 p-8 sm:p-12">
+            
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="hidden absolute inset-0 bg-white/95 z-30 flex flex-col items-center justify-center">
+                <div class="w-16 h-16 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+                <p class="mt-4 font-black text-gray-700 animate-pulse">در حال آنالیز شخصیت شما...</p>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz-section" class="fade-in">
+                <!-- Progress Bar -->
+                <div class="mb-8">
+                    <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                        <span>پیشرفت تست</span>
+                        <span id="progress-val">۰٪</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-orange-500 to-purple-600 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <h2 id="question-text" class="text-xl sm:text-2xl font-black mb-8 text-gray-800 leading-relaxed"></h2>
+                <div id="options-container" class="grid gap-4"></div>
+            </div>
+
+            <!-- Lead Section -->
+            <div id="lead-section" class="hidden fade-in text-center">
+                <h2 class="text-2xl font-black mb-6">تست با موفقیت به پایان رسید!</h2>
+                <form id="leadForm" action="https://formspree.io/f/xeebdgpp" method="POST" class="space-y-4 max-w-sm mx-auto text-right">
+                    <input type="text" name="name" id="user-name" required placeholder="نام شما" class="w-full p-4 rounded-2xl bg-gray-100 border border-gray-200 outline-none focus:border-purple-500">
+                    <input type="tel" name="phone" required placeholder="شماره تماس" class="w-full p-4 rounded-2xl bg-gray-100 border border-gray-200 outline-none focus:border-orange-500">
+                    <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-purple-600 text-white font-black py-4 rounded-2xl hover:scale-[1.02] transition-all shadow-lg">مشاهده نتیجه</button>
+                </form>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden fade-in flex flex-col items-center w-full">
+                <div id="capture-area" class="w-full max-w-sm mx-auto rounded-[2.5rem] overflow-hidden shadow-2xl mb-8 p-1 bg-gradient-to-br">
+                    <div class="bg-white/90 backdrop-blur-xl rounded-[2.3rem] p-8 text-center text-gray-800 relative overflow-hidden">
+                        <div id="bg-pattern" class="absolute inset-0 opacity-10 pointer-events-none"></div>
+                        <div id="char-icon" class="text-6xl mb-4 relative z-10"></div>
+                        <h2 id="res-name" class="text-lg font-bold mb-1 relative z-10"></h2>
+                        <h3 id="res-title" class="text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-600 relative z-10"></h3>
+                        <p id="res-desc" class="text-sm p-4 rounded-xl bg-black/5 font-medium relative z-10"></p>
+                        
+                        <div class="mt-8 flex items-center justify-center gap-2 font-bold text-gray-500 relative z-10 border-t pt-4">
+                            <span>@gamification_club</span>
+                            <i class="fab fa-telegram text-blue-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-4 w-full max-w-sm">
+                    <button onclick="downloadCard()" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-black transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-download"></i> دانلود کارت شخصیت
+                    </button>
+                    
+                    <div class="grid grid-cols-4 gap-2 py-2">
+                        <a id="share-li" target="_blank" class="w-full aspect-square rounded-2xl bg-blue-700 text-white flex items-center justify-center hover:scale-105"><i class="fab fa-linkedin-in"></i></a>
+                        <a id="share-tg" target="_blank" class="w-full aspect-square rounded-2xl bg-sky-500 text-white flex items-center justify-center hover:scale-105"><i class="fab fa-telegram-plane"></i></a>
+                        <a id="share-wa" target="_blank" class="w-full aspect-square rounded-2xl bg-green-500 text-white flex items-center justify-center hover:scale-105"><i class="fab fa-whatsapp"></i></a>
+                        <button onclick="copyAndInstagram()" class="w-full aspect-square rounded-2xl bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500 text-white flex items-center justify-center hover:scale-105"><i class="fab fa-instagram"></i></button>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="mt-6 text-gray-400 font-bold hover:text-gray-600">شروع مجدد</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const questions = [
+            { text: "اولین واکنشت به یک چالش جدید؟", options: [{t:"اقدام جسورانه",v:"A"}, {t:"برنامه‌ریزی دقیق",v:"B"}, {t:"همفکری تیمی",v:"C"}, {t:"تحلیل ریسک",v:"D"}] },
+            { text: "در جلسات تیمی چه نقشی داری؟", options: [{t:"ایده‌پرداز",v:"A"}, {t:"سازمان‌دهنده",v:"B"}, {t:"میانجی",v:"C"}, {t:"تحلیل‌گر",v:"D"}] },
+            { text: "محیط کاری ایده‌آل؟", options: [{t:"پر از هیجان",v:"A"}, {t:"سیستماتیک",v:"B"}, {t:"دوستانه",v:"C"}, {t:"آرام و متمرکز",v:"D"}] },
+            { text: "برخورد با مشکل؟", options: [{t:"تغییر استراتژی",v:"A"}, {t:"ساخت سیستم رفع باگ",v:"B"}, {t:"مشورت",v:"C"}, {t:"تحلیل منطقی",v:"D"}] },
+            { text: "تعریف موفقیت؟", options: [{t:"شکستن رکوردها",v:"A"}, {t:"سیستم پایدار",v:"B"}, {t:"رشد جمعی",v:"C"}, {t:"دقت بی‌نقص",v:"D"}] }
+        ];
+
+        const results = {
+            A: { title: "شکارچی چالش", icon: "🚀", grad: "from-orange-400 to-red-500", pattern: "bg-pattern-A", desc: "شما یک پیشروی جسور هستید که چالش‌ها را به فرصت تبدیل می‌کند." },
+            B: { title: "معمار سیستم", icon: "⚙️", grad: "from-blue-400 to-indigo-500", pattern: "bg-pattern-B", desc: "شما خالق نظم هستید و سیستم‌های کارآمد می‌سازید." },
+            C: { title: "تسهیل‌گر اجتماعی", icon: "🤝", grad: "from-pink-400 to-rose-500", pattern: "bg-pattern-C", desc: "شما قلب تپنده تیم و عامل همبستگی هستید." },
+            D: { title: "تحلیل‌گر دقیق", icon: "💎", grad: "from-emerald-400 to-teal-500", pattern: "bg-pattern-D", desc: "شما با دقت و منطق، کیفیت را به اوج می‌رسانید." }
+        };
+
+        let qIdx = 0, scores = {A:0, B:0, C:0, D:0};
+
+        function updateProgress() {
+            const p = (qIdx / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = p + "%";
+            document.getElementById('progress-val').innerText = Math.round(p) + "٪";
+        }
+
+        function renderQ() {
+            updateProgress();
+            document.getElementById('question-text').innerText = questions[qIdx].text;
+            const cont = document.getElementById('options-container');
+            cont.innerHTML = '';
+            questions[qIdx].options.forEach(o => {
+                const b = document.createElement('button');
+                b.className = "w-full text-right p-4 rounded-2xl border border-gray-200 hover:bg-purple-50 font-bold transition-all";
+                b.innerText = o.t;
+                b.onclick = () => { scores[o.v]++; qIdx++; qIdx < 5 ? renderQ() : showLead(); };
+                cont.appendChild(b);
+            });
+        }
+
+        function showLead() {
+            updateProgress();
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('lead-section').classList.remove('hidden');
+        }
+
+        document.getElementById('leadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            const timer = new Promise(resolve => setTimeout(resolve, 2000));
+            const submit = fetch(e.target.action, { method: 'POST', body: new FormData(e.target) }).catch(() => {});
+            await Promise.race([timer, submit]);
+            renderResult();
+        };
+
+        function renderResult() {
+            let best = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            let res = results[best];
+            document.getElementById('lead-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+            document.getElementById('res-name').innerText = document.getElementById('user-name').value + " عزیز!";
+            document.getElementById('res-title').innerText = res.title;
+            document.getElementById('res-desc').innerText = res.desc;
+            document.getElementById('char-icon').innerText = res.icon;
+            const area = document.getElementById('capture-area');
+            area.className = `w-full max-w-sm mx-auto rounded-[2.5rem] overflow-hidden shadow-2xl mb-8 p-1 bg-gradient-to-br ${res.grad}`;
+            document.getElementById('bg-pattern').className = `absolute inset-0 opacity-10 pointer-events-none ${res.pattern}`;
+            const txt = `من در تست شخصیت‌شناسی کاری تیپ ${res.title} شدم! تستش کن:`;
+            document.getElementById('share-li').href = `https://www.linkedin.com/sharing/share-offsite/?url=${window.location.href}`;
+            document.getElementById('share-tg').href = `https://t.me/share/url?url=${window.location.href}&text=${txt}`;
+            document.getElementById('share-wa').href = `https://wa.me/?text=${txt} ${window.location.href}`;
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function copyAndInstagram() {
+            const txt = `من در تست شخصیت‌شناسی کاری تیپ ${document.getElementById('res-title').innerText} شدم! تستش کن: ${window.location.href}`;
+            navigator.clipboard.writeText(txt);
+            alert("متن کپی شد! حالا اینستاگرام باز می‌شود، عکس کارت را استوری کن و متن را پیست کن.");
+            window.open('https://www.instagram.com', '_blank');
+        }
+
+        function downloadCard() {
+            html2canvas(document.getElementById('capture-area'), { useCORS: true }).then(c => {
+                const l = document.createElement('a'); l.download = 'personality-result.png'; l.href = c.toDataURL(); l.click();
+            });
+        }
+
+        renderQ();
+    </script>
+</body>
+</html>
